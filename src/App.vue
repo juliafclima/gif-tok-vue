@@ -30,7 +30,7 @@
       :gif="selectedGif"
       @closeModal="closeModal" />
 
-    <button v-if="showLoadMoreButton"
+    <button v-if="showLoadMoreButton && !modalOpen"
       @click="loadMoreGifs"
       class="button">Carregar Mais</button>
   </div>
@@ -61,7 +61,8 @@ export default {
       offset: 0,
       selectedGif: null,
       apiKey: 'T3VzRAPxVaXOCS4dYeRvtBQNuJ6WROCa',
-      showLoadMoreButton: false
+      showLoadMoreButton: false,
+      modalOpen: false
     };
   },
 
@@ -147,10 +148,12 @@ export default {
 
     showGif(gif) {
       this.selectedGif = gif;
+      this.modalOpen = true;
     },
 
     closeModal() {
       this.selectedGif = null;
+      this.modalOpen = false;
     },
 
     clearSearchQuery() {
