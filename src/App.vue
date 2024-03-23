@@ -1,53 +1,72 @@
 <template>
   <div class="container">
+    <div class="container__title">
+      <h1>GIF TOK</h1>
+    </div>
+
     <div class="search-bar">
       <input type="text"
         v-model="searchQuery"
         @input="searchGifs"
+        @focus="clearSearchQuery"
         placeholder="Pesquisar GIFs">
     </div>
 
-    <div class="gif-grid">
-      <div v-for="(gif, index) in gifs"
-        :key="index"
-        @click="showGif(gif)">
-        <img :src="gif.url" alt="GIF">
-      </div>
+    <GifGrid :gifs="gifs"
+      @showGif="showGif" />
+
+    <div v-if="loading"
+      class="newtons-cradle">
+      <div class="newtons-cradle__dot"></div>
+      <div class="newtons-cradle__dot"></div>
+      <div class="newtons-cradle__dot"></div>
+      <div class="newtons-cradle__dot"></div>
     </div>
 
-    <div v-if="loading" class="loading">Carregando...</div>
+    <div v-if="error"
+      class="error">{{ error }}</div>
 
-    <div v-if="error" class="error">{{ error }}</div>
+    <GifModal v-if="selectedGif"
+      :gif="selectedGif"
+      @closeModal="closeModal" />
 
-    <div v-if="selectedGif" class="modal">
-      <div class="modal-content">
-        <span class="close" @click="closeModal">&times;</span>
-        <img :src="selectedGif.url" alt="GIF">
-      </div>
-    </div>
-
-    <button v-if="showLoadMoreButton" @click="loadMoreGifs">Carregar Mais</button>
+    <button v-if="showLoadMoreButton"
+      @click="loadMoreGifs"
+      class="button">Carregar Mais</button>
   </div>
 </template>
 
 <script>
-import './assets/styles/index.css';
+import './assets/styles/global.css';
+import './assets/styles/button.css';
+import './assets/styles/loading.css';
 import axios from 'axios';
+import GifGrid from './components/GifGrid/GifGrid.vue';
+import GifModal from './components/GifModal/GifModal.vue';
 
 export default {
   name: 'App',
+
+  components: {
+    GifGrid,
+    GifModal
+  },
 
   data() {
     return {
       gifs: [],
       loading: false,
       error: '',
-      searchQuery: '',
+      searchQuery: 'dogs',
       offset: 0,
       selectedGif: null,
       apiKey: 'T3VzRAPxVaXOCS4dYeRvtBQNuJ6WROCa',
       showLoadMoreButton: false
     };
+  },
+
+  mounted() {
+    this.searchGifs();
   },
 
   methods: {
@@ -66,7 +85,7 @@ export default {
               api_key: this.apiKey,
               q: this.searchQuery,
               rating: 'pg',
-              limit: 2, 
+              limit: 6,
               offset: this.offset
             }
           });
@@ -75,16 +94,21 @@ export default {
             url: item.images.original.url
           }));
 
-          this.showLoadMoreButton = response.data.pagination.total_count > 2;
+          this.showLoadMoreButton = response.data.pagination.total_count > 6;
 
         } catch (error) {
+
           if (error.response && error.response.status === 429) {
             setTimeout(this.searchGifs, 5000);
+
             this.error = 'Limite excedido. Tente novamente mais tarde.';
+
           } else {
             this.error = 'Erro ao buscar GIFs.';
           }
+
           console.error('Erro ao buscar GIFs:', error);
+
         } finally {
           this.loading = false;
         }
@@ -93,7 +117,7 @@ export default {
 
     async loadMoreGifs() {
       this.loading = true;
-      this.offset += 2; 
+      this.offset += 6;
 
       try {
         const response = await axios.get('https://api.giphy.com/v1/gifs/search', {
@@ -101,7 +125,7 @@ export default {
             api_key: this.apiKey,
             q: this.searchQuery,
             rating: 'pg',
-            limit: 2,
+            limit: 6,
             offset: this.offset
           }
         });
@@ -127,7 +151,11 @@ export default {
 
     closeModal() {
       this.selectedGif = null;
-    }
+    },
+
+    clearSearchQuery() {
+      this.searchQuery = '';
+    },
   }
 };
 </script>

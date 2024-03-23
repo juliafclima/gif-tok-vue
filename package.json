@@ -11,6 +11,7 @@
     "@giphy/js-fetch-api": "^5.4.0",
     "axios": "^1.6.8",
     "core-js": "^3.8.3",
+    "oh-vue-icons": "^1.0.0-rc3",
     "vue": "^3.2.13"
   },
   "devDependencies": {
