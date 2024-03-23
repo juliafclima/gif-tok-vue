@@ -26,7 +26,6 @@
       </div>
     </div>
 
-    <!-- Botão para carregar mais gifs -->
     <button v-if="showLoadMoreButton" @click="loadMoreGifs">Carregar Mais</button>
   </div>
 </template>
@@ -67,16 +66,15 @@ export default {
               api_key: this.apiKey,
               q: this.searchQuery,
               rating: 'pg',
-              limit: 2, // Inicialmente carrega apenas 2 gifs
+              limit: 2, 
               offset: this.offset
             }
           });
 
           this.gifs = response.data.data.map(item => ({
-            url: item.images.original.url // Substitui a URL da API pela URL local das imagens
+            url: item.images.original.url
           }));
 
-          // Mostra o botão "Carregar Mais" se houver mais gifs disponíveis
           this.showLoadMoreButton = response.data.pagination.total_count > 2;
 
         } catch (error) {
@@ -95,7 +93,7 @@ export default {
 
     async loadMoreGifs() {
       this.loading = true;
-      this.offset += 2; // Carrega mais 2 gifs
+      this.offset += 2; 
 
       try {
         const response = await axios.get('https://api.giphy.com/v1/gifs/search', {
@@ -108,14 +106,12 @@ export default {
           }
         });
 
-        // Adiciona os gifs carregados ao array existente
         response.data.data.forEach(item => {
           this.gifs.push({
-            url: item.images.original.url // Substitui a URL da API pela URL local das imagens
+            url: item.images.original.url
           });
         });
 
-        // Esconde o botão "Carregar Mais" se não houver mais gifs disponíveis
         this.showLoadMoreButton = this.gifs.length < response.data.pagination.total_count;
 
       } catch (error) {
